@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-blush: #F6D5E3;
+  --color-lavender: #D9C6F3;
+  --color-peach: #F9D7C2;
+  --color-cream: #F8F3EE;
+  --color-sidebar: #EFE7E1;
+  --color-card: #FFFDFC;
+  
+  --color-text-primary: #1F1A17;
+  --color-text-secondary: #7A6E67;
+  --color-text-muted: #A69A93;
+  
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+:root {
+  --background: #F8F3EE;
+  --foreground: #1F1A17;
+  --glass-bg: rgba(255, 253, 252, 0.8);
+  --glass-border: rgba(31, 26, 23, 0.1);
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 40px -10px rgba(31, 26, 23, 0.08);
+}
+
+.glass-dark {
+  background: rgba(31, 26, 23, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(31, 26, 23, 0.08);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #F7D6E0 0%, #DCCCF5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-soft-gradient {
+  background: linear-gradient(135deg, #FFF7F1 0%, #F3E9DC 100%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.1);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.3);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.2);
+}
+
+/* Premium Typography */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+}
