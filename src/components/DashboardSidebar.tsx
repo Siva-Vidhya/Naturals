@@ -1,19 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
-  TrendingUp, 
-  Settings, 
-  LogOut, 
-  Sparkles,
-  Camera,
-  Bot,
-  Cctv,
-  Smartphone
-} from "lucide-react";
+import { LayoutDashboard, Users, Calendar, TrendingUp, Settings, LogOut, Sparkles, Camera, Bot, Cctv, Smartphone, BarChart3 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -29,19 +17,34 @@ export default function DashboardSidebar() {
   };
 
   const navItems = [
-    { icon: LayoutDashboard, label: "Command Center", path: "/dashboard" },
-    { icon: Camera, label: "Beauty Passport", path: "/dashboard/beauty-passport" },
-    { icon: Bot, label: "Stylist CoPilot", path: "/dashboard/stylist-copilot" },
-    { icon: BarChart3, label: "Neural Analytics", path: "/dashboard/neural-analytics" },
-    { icon: Cctv, label: "NeuroWatch AI", path: "/dashboard/neurowatch-ai" },
-    { icon: Smartphone, label: "Mobile Experience", path: "/dashboard/mobile-experience" },
+    { icon: LayoutDashboard, label: "Command Center",    path: "/dashboard" },
+    { icon: Camera,          label: "Beauty Passport",   path: "/dashboard/beauty-passport" },
+    { icon: Bot,             label: "Stylist CoPilot",   path: "/dashboard/stylist-copilot" },
+    { icon: BarChart3,       label: "Neural Analytics",  path: "/dashboard/neural-analytics" },
+    { icon: Cctv,            label: "NeuroWatch AI",     path: "/dashboard/neurowatch-ai" },
+    { icon: Smartphone,      label: "Mobile Experience", path: "/dashboard/mobile-experience" },
   ];
 
   const resourceItems = [
-    { icon: Users, label: "Human Assets", path: "/dashboard/human-assets" },
+    { icon: Users,    label: "Human Assets",   path: "/dashboard/human-assets" },
     { icon: Calendar, label: "Neural Schedule", path: "/dashboard/neural-schedule" },
-    { icon: Settings, label: "Core Settings", path: "/dashboard/core-settings" },
+    { icon: Settings, label: "Core Settings",   path: "/dashboard/core-settings" },
   ];
+
+  const NavBtn = ({ icon: Icon, label, path }: { icon: any; label: string; path: string }) => (
+    <button
+      onClick={() => router.push(path)}
+      className={cn(
+        "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all",
+        pathname === path
+          ? "bg-card shadow-xl shadow-foreground/5 text-lavender border border-foreground/5"
+          : "text-text-secondary hover:bg-card/50 hover:text-text-primary"
+      )}
+    >
+      <Icon className={cn("w-5 h-5", pathname === path ? "text-lavender" : "text-text-secondary/60")} />
+      {label}
+    </button>
+  );
 
   return (
     <aside className="w-80 bg-sidebar border-r border-foreground/5 flex flex-col p-8 hidden xl:flex z-50">
@@ -57,41 +60,13 @@ export default function DashboardSidebar() {
 
       <nav className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2">
         <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] mb-6 px-4">Management</p>
-        {navItems.map((item, i) => (
-          <button
-            key={i}
-            onClick={() => router.push(item.path!)}
-            className={cn(
-              "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all",
-              pathname === item.path 
-                ? "bg-card shadow-xl shadow-foreground/5 text-lavender border border-foreground/5" 
-                : "text-text-secondary hover:bg-card/50 hover:text-text-primary"
-            )}
-          >
-            <item.icon className={cn("w-5 h-5", pathname === item.path ? "text-lavender" : "text-text-secondary/60")} />
-            {item.label}
-          </button>
-        ))}
+        {navItems.map((item) => <NavBtn key={item.path} {...item} />)}
 
         <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] mt-12 mb-6 px-4">Resources</p>
-        {resourceItems.map((item, i) => (
-          <button
-            key={i}
-            onClick={() => router.push(item.path)}
-            className={cn(
-              "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all",
-              pathname === item.path 
-                ? "bg-card shadow-xl shadow-foreground/5 text-lavender border border-foreground/5" 
-                : "text-text-secondary hover:bg-card/50 hover:text-text-primary"
-            )}
-          >
-            <item.icon className={cn("w-5 h-5", pathname === item.path ? "text-lavender" : "text-text-secondary/60")} />
-            {item.label}
-          </button>
-        ))}
+        {resourceItems.map((item) => <NavBtn key={item.path} {...item} />)}
 
         <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] mt-12 mb-6 px-4">Utility</p>
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50/50 transition-all"
         >
@@ -102,6 +77,3 @@ export default function DashboardSidebar() {
     </aside>
   );
 }
-
-// Fixed missing BarChart3 import in the file
-import { BarChart3 } from "lucide-react";
