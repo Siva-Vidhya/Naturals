@@ -1,228 +1,249 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  User, 
-  Building2, 
-  Bell, 
-  Shield, 
-  Share2, 
-  CreditCard,
-  Camera,
-  ChevronRight,
-  Globe,
-  Mail,
-  Smartphone,
-  Lock,
-  Cloud,
-  ExternalLink,
-  Save,
-  Trash2
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Settings, User, Building2, Bell, Shield, Link2, CreditCard, Save, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
+const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
+const stagger = { animate: { transition: { staggerChildren: 0.07 } } };
 
 const TABS = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'salon', label: 'Salon Information', icon: Building2 },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'security', label: 'Security', icon: Shield },
-  { id: 'integrations', label: 'Integrations', icon: Share2 },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
+  { id: "profile",       label: "Profile",       icon: User },
+  { id: "salon",         label: "Salon Info",     icon: Building2 },
+  { id: "notifications", label: "Notifications",  icon: Bell },
+  { id: "security",      label: "Security",       icon: Shield },
+  { id: "integrations",  label: "Integrations",   icon: Link2 },
+  { id: "billing",       label: "Billing",        icon: CreditCard },
 ];
 
-export default function CoreSettingsPage() {
-  const [activeTab, setActiveTab] = useState('profile');
-
+function Field({ label, placeholder, type = "text", defaultValue = "" }: { label: string; placeholder: string; type?: string; defaultValue?: string }) {
   return (
-    <div className="space-y-12">
-      <div className="flex justify-between items-end">
-         <div>
-           <h2 className="text-4xl font-black tracking-tighter mb-2 text-text-primary">Core <span className="text-lavender">Settings</span></h2>
-           <p className="text-sm font-medium text-text-secondary italic">Centralized configuration and account telemetry.</p>
-         </div>
-         <button className="px-8 py-4 rounded-2xl bg-lavender text-white text-xs font-black uppercase tracking-widest shadow-2xl shadow-lavender/20 hover:scale-105 transition-all flex items-center gap-2">
-            <Save className="w-4 h-4" /> Save All Changes
-         </button>
+    <div className="space-y-1.5">
+      <label className="text-[12px] font-semibold text-text-secondary">{label}</label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        className="w-full h-10 px-3.5 rounded-xl bg-black/[0.03] border border-black/[0.07] text-[13px] font-medium text-text-primary placeholder:text-text-muted focus:bg-white focus:border-lavender/40 focus:ring-4 focus:ring-lavender/10 outline-none transition-all"
+      />
+    </div>
+  );
+}
+
+function Toggle({ label, description, defaultChecked = false }: { label: string; description?: string; defaultChecked?: boolean }) {
+  const [on, setOn] = useState(defaultChecked);
+  return (
+    <div className="flex items-center justify-between py-3.5 border-b border-black/[0.04] last:border-0">
+      <div>
+        <p className="text-[13px] font-semibold text-text-primary">{label}</p>
+        {description && <p className="text-[11px] text-text-muted mt-0.5">{description}</p>}
       </div>
+      <button
+        onClick={() => setOn(!on)}
+        aria-pressed={on}
+        className={cn("relative w-10 h-5.5 rounded-full transition-colors duration-200 shrink-0", on ? "bg-lavender" : "bg-black/[0.12]")}
+      >
+        <span className={cn("absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200", on ? "translate-x-4.5" : "translate-x-0")} />
+      </button>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-         {/* Settings Tabs */}
-         <div className="lg:col-span-3 space-y-3">
-            {TABS.map((tab) => (
-               <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                     "w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all",
-                     activeTab === tab.id 
-                        ? "bg-card shadow-xl shadow-foreground/5 text-lavender border border-foreground/5" 
-                        : "text-text-secondary hover:bg-card/50 hover:text-text-primary"
-                  )}
-               >
-                  <tab.icon className={cn("w-5 h-5", activeTab === tab.id ? "text-lavender" : "text-text-secondary/60")} />
-                  {tab.label}
-               </button>
-            ))}
-         </div>
+const INTEGRATION_LIST = [
+  { name: "Stripe Payments",    status: "Connected",     logo: "💳" },
+  { name: "Google Calendar",    status: "Connected",     logo: "📅" },
+  { name: "Twilio SMS",         status: "Not connected", logo: "💬" },
+  { name: "Mailchimp",          status: "Not connected", logo: "📧" },
+  { name: "Zapier",             status: "Connected",     logo: "⚡" },
+];
 
-         {/* Content Area */}
-         <div className="lg:col-span-9">
-            <div className="glass p-10 rounded-[3.5rem] border-foreground/5 shadow-2xl bg-card">
-               {activeTab === 'profile' && (
-                  <motion.div 
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     className="space-y-12"
-                  >
-                     <div className="flex items-center gap-10">
-                        <div className="relative group">
-                           <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-lavender to-blush flex items-center justify-center text-white text-4xl font-black shadow-2xl border-4 border-card">
-                              AV
-                           </div>
-                           <button className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-foreground text-card flex items-center justify-center shadow-lg border-2 border-card hover:scale-110 transition-all">
-                              <Camera className="w-5 h-5" />
-                           </button>
-                        </div>
-                        <div>
-                           <h3 className="text-2xl font-black tracking-tight">Alexandra V.</h3>
-                           <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Chief Operations Officer</p>
-                           <div className="flex gap-2 mt-4">
-                              <span className="px-3 py-1 rounded-full bg-lavender/10 text-lavender text-[9px] font-black uppercase tracking-widest">Admin Access</span>
-                              <span className="px-3 py-1 rounded-full bg-sage/10 text-sage-dark text-[9px] font-black uppercase tracking-widest">Verified</span>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {[
-                           { label: "Full Name", value: "Alexandra Volkov", icon: User },
-                           { label: "Email Address", value: "alexandra.v@neurostrom.com", icon: Mail },
-                           { label: "Phone Number", value: "+1 (555) 012-3456", icon: Smartphone },
-                           { label: "Language", value: "English (US)", icon: Globe },
-                        ].map((field, i) => (
-                           <div key={i} className="space-y-2">
-                              <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-2">{field.label}</label>
-                              <div className="relative group">
-                                 <field.icon className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-lavender transition-colors" />
-                                 <input 
-                                    defaultValue={field.value}
-                                    className="w-full h-14 pl-14 pr-6 rounded-2xl bg-foreground/[0.02] border border-foreground/5 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-lavender/5 transition-all"
-                                 />
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                  </motion.div>
-               )}
-
-               {activeTab === 'salon' && (
-                  <motion.div 
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     className="space-y-10"
-                  >
-                     <h3 className="text-2xl font-black tracking-tight mb-8">Salon Profile</h3>
-                     <div className="space-y-6">
-                        <div className="p-6 rounded-[2.5rem] bg-foreground/[0.02] border border-foreground/5 flex items-center justify-between group hover:border-lavender/30 transition-all cursor-pointer">
-                           <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-lavender/10 flex items-center justify-center">
-                                 <Building2 className="w-6 h-6 text-lavender" />
-                              </div>
-                              <div>
-                                 <p className="font-black text-base text-text-primary">Soho Flagship Hub</p>
-                                 <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">42 Mercer St, New York, NY 10013</p>
-                              </div>
-                           </div>
-                           <ChevronRight className="w-5 h-5 text-text-muted group-hover:translate-x-1 transition-transform" />
-                        </div>
-                     </div>
-                     <button className="w-full py-5 rounded-2xl bg-card border-2 border-dashed border-foreground/10 text-text-muted text-[10px] font-black uppercase tracking-widest hover:border-lavender/40 hover:text-lavender transition-all">
-                        + Add New Branch Location
-                     </button>
-                  </motion.div>
-               )}
-
-               {activeTab === 'security' && (
-                  <motion.div 
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     className="space-y-10"
-                  >
-                     <h3 className="text-2xl font-black tracking-tight mb-8">Security & Privacy</h3>
-                     <div className="space-y-4">
-                        <div className="flex items-center justify-between p-6 rounded-3xl bg-foreground/[0.02] border border-foreground/5">
-                           <div className="flex items-center gap-4">
-                              <Lock className="w-5 h-5 text-text-muted" />
-                              <div>
-                                 <p className="text-sm font-black text-text-primary">Two-Factor Authentication</p>
-                                 <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">Add an extra layer of security</p>
-                              </div>
-                           </div>
-                           <button className="px-5 py-2 rounded-xl bg-sage/10 text-sage-dark text-[9px] font-black uppercase tracking-widest">Enabled</button>
-                        </div>
-                        <div className="flex items-center justify-between p-6 rounded-3xl bg-foreground/[0.02] border border-foreground/5">
-                           <div className="flex items-center gap-4">
-                              <Cloud className="w-5 h-5 text-text-muted" />
-                              <div>
-                                 <p className="text-sm font-black text-text-primary">Data Encryption</p>
-                                 <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">AES-256 System-wide protocol</p>
-                              </div>
-                           </div>
-                           <button className="px-5 py-2 rounded-xl bg-sage/10 text-sage-dark text-[9px] font-black uppercase tracking-widest">Active</button>
-                        </div>
-                     </div>
-                     <div className="pt-6 border-t border-foreground/5">
-                        <button className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-opacity">
-                           <Trash2 className="w-4 h-4" /> Deactivate Account Telemetry
-                        </button>
-                     </div>
-                  </motion.div>
-               )}
-
-               {activeTab === 'billing' && (
-                  <motion.div 
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     className="space-y-10"
-                  >
-                     <div className="p-10 rounded-[3rem] bg-gradient-to-br from-lavender to-blush text-white shadow-2xl relative overflow-hidden">
-                        <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-                        <div className="relative z-10 flex justify-between items-start">
-                           <div>
-                              <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Current Plan</p>
-                              <h3 className="text-4xl font-black tracking-tighter">Enterprise Pro</h3>
-                              <p className="text-xs font-bold opacity-60 mt-4">$499 / Month • 12 Active Branches</p>
-                           </div>
-                           <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                              <CreditCard className="w-7 h-7" />
-                           </div>
-                        </div>
-                     </div>
-                     <div className="grid grid-cols-2 gap-6">
-                        <div className="p-6 rounded-[2.5rem] bg-foreground/[0.02] border border-foreground/5">
-                           <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-4">Payment Method</p>
-                           <div className="flex items-center gap-4">
-                              <div className="w-12 h-8 bg-foreground/10 rounded-md" />
-                              <p className="text-sm font-black">Visa ending in 4242</p>
-                           </div>
-                        </div>
-                        <div className="p-6 rounded-[2.5rem] bg-foreground/[0.02] border border-foreground/5">
-                           <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-4">Next Billing Date</p>
-                           <p className="text-sm font-black">November 12, 2026</p>
-                        </div>
-                     </div>
-                  </motion.div>
-               )}
-
-               {activeTab !== 'profile' && activeTab !== 'salon' && activeTab !== 'security' && activeTab !== 'billing' && (
-                  <div className="py-20 text-center">
-                     <p className="text-sm font-bold text-text-muted italic">Neural interface for {activeTab} is currently in calibration...</p>
-                  </div>
-               )}
-            </div>
-         </div>
+function ProfileTab({ user }: { user: any }) {
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.02] border border-black/[0.04]">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-lavender to-blush flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+          {(user?.user_metadata?.full_name ?? user?.email ?? "U").charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <p className="text-base font-bold text-text-primary">{user?.user_metadata?.full_name || "Your Name"}</p>
+          <p className="text-[12px] text-text-muted">{user?.email}</p>
+          <button className="mt-1.5 text-[11px] font-semibold text-lavender hover:underline">Change avatar</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Full Name"  placeholder="Your full name"  defaultValue={user?.user_metadata?.full_name || ""} />
+        <Field label="Job Title"  placeholder="e.g. Chief Operations Officer" />
+        <Field label="Email"      placeholder="your@email.com"  type="email" defaultValue={user?.email || ""} />
+        <Field label="Phone"      placeholder="+1 555 000 0000" type="tel" />
       </div>
     </div>
+  );
+}
+
+function SalonTab() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <Field label="Salon Name"    placeholder="e.g. NeuroStrom Soho" defaultValue="NeuroStrom Flagship" />
+      <Field label="Business Type" placeholder="e.g. Hair & Beauty" />
+      <Field label="Address Line 1" placeholder="123 Main Street" />
+      <Field label="City"          placeholder="New York" />
+      <Field label="ZIP / Postcode" placeholder="10001" />
+      <Field label="Country"       placeholder="United States" />
+      <div className="sm:col-span-2">
+        <Field label="Website"     placeholder="https://yoursalon.com" type="url" />
+      </div>
+    </div>
+  );
+}
+
+function NotificationsTab() {
+  return (
+    <div className="space-y-0">
+      <Toggle label="Appointment reminders"     description="Send SMS/email 24h before"           defaultChecked={true}  />
+      <Toggle label="AI scan alerts"            description="Notify when Beauty Passport completes" defaultChecked={true}  />
+      <Toggle label="Staff performance reports" description="Weekly digest every Monday"            defaultChecked={false} />
+      <Toggle label="Revenue milestones"        description="Alert when targets are hit"            defaultChecked={true}  />
+      <Toggle label="System status updates"     description="Downtime and maintenance notices"      defaultChecked={true}  />
+      <Toggle label="Marketing emails"          description="Promotions and product updates"        defaultChecked={false} />
+    </div>
+  );
+}
+
+function SecurityTab() {
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Current Password" placeholder="••••••••"     type="password" />
+        <Field label="New Password"     placeholder="••••••••"     type="password" />
+        <Field label="Confirm Password" placeholder="••••••••"     type="password" />
+      </div>
+      <div className="p-4 rounded-2xl bg-black/[0.02] border border-black/[0.04] space-y-0">
+        <Toggle label="Two-factor authentication" description="Require OTP on every login" defaultChecked={true} />
+        <Toggle label="Active session alerts"     description="Email when new device signs in"  defaultChecked={true} />
+        <Toggle label="Biometric login"           description="Use fingerprint / Face ID on mobile" />
+      </div>
+    </div>
+  );
+}
+
+function IntegrationsTab() {
+  return (
+    <div className="space-y-2">
+      {INTEGRATION_LIST.map((item, i) => (
+        <div key={i} className="flex items-center gap-4 p-4 rounded-2xl border border-black/[0.05] hover:border-lavender/30 transition-all">
+          <span className="text-2xl">{item.logo}</span>
+          <div className="flex-1">
+            <p className="text-[13px] font-semibold text-text-primary">{item.name}</p>
+            <p className={cn("text-[11px] font-medium", item.status === "Connected" ? "text-sage-dark" : "text-text-muted")}>{item.status}</p>
+          </div>
+          <button className={cn("h-8 px-3.5 rounded-xl text-[12px] font-semibold transition-all", item.status === "Connected" ? "bg-black/[0.04] text-text-secondary hover:bg-black/[0.08]" : "bg-lavender/20 text-[#6b4fa0] hover:bg-lavender/30")}>
+            {item.status === "Connected" ? "Manage" : "Connect"}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BillingTab() {
+  return (
+    <div className="space-y-4">
+      <div className="p-4 rounded-2xl bg-gradient-to-br from-lavender/20 to-blush/10 border border-lavender/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-1">Current Plan</p>
+            <p className="text-xl font-extrabold text-text-primary">Enterprise Pro</p>
+            <p className="text-[12px] text-text-secondary mt-0.5">$299 / month · Renews Jun 1, 2026</p>
+          </div>
+          <span className="badge-success text-[10px] font-bold px-3 py-1 rounded-full">Active</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Cardholder Name"  placeholder="Name on card" />
+        <Field label="Card Number"      placeholder="•••• •••• •••• ••••" />
+        <Field label="Expiry"           placeholder="MM / YY" />
+        <Field label="CVV"              placeholder="•••" />
+      </div>
+      <div className="p-4 rounded-2xl bg-black/[0.02] border border-black/[0.04]">
+        <p className="text-[12px] font-semibold text-text-secondary mb-3">Recent Invoices</p>
+        {["May 2026 — $299","Apr 2026 — $299","Mar 2026 — $299"].map((inv, i) => (
+          <div key={i} className="flex items-center justify-between py-2.5 border-b border-black/[0.04] last:border-0">
+            <p className="text-[12px] font-medium text-text-primary">{inv}</p>
+            <button className="text-[11px] font-semibold text-lavender hover:underline">Download</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const TAB_CONTENT: Record<string, (user: any) => React.ReactNode> = {
+  profile:       (u) => <ProfileTab user={u} />,
+  salon:         ()  => <SalonTab />,
+  notifications: ()  => <NotificationsTab />,
+  security:      ()  => <SecurityTab />,
+  integrations:  ()  => <IntegrationsTab />,
+  billing:       ()  => <BillingTab />,
+};
+
+export default function CoreSettingsPage() {
+  const [active, setActive] = useState("profile");
+  const { user } = useAuth();
+
+  return (
+    <motion.div variants={stagger} initial="initial" animate="animate" className="space-y-6">
+      {/* Header */}
+      <motion.div variants={fadeUp}>
+        <p className="section-label mb-1">System</p>
+        <h1 className="text-3xl font-bold tracking-tight text-text-primary">Core Settings</h1>
+        <p className="text-sm text-text-secondary mt-1">Manage your account, salon, and platform preferences.</p>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar tabs */}
+        <aside className="lg:w-52 shrink-0">
+          <nav className="space-y-0.5">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActive(tab.id)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-semibold transition-all",
+                  active === tab.id
+                    ? "nav-pill-active text-text-primary"
+                    : "text-text-secondary hover:bg-black/[0.04] hover:text-text-primary"
+                )}
+              >
+                <tab.icon className={cn("w-4 h-4 shrink-0", active === tab.id ? "text-lavender" : "text-text-muted")} />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Content panel */}
+        <div className="flex-1 min-w-0">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="card p-6 space-y-5"
+          >
+            <h2 className="text-base font-bold text-text-primary border-b border-black/[0.05] pb-4">
+              {TABS.find(t => t.id === active)?.label}
+            </h2>
+            {TAB_CONTENT[active]?.(user)}
+            <div className="pt-2 flex justify-end">
+              <button className="h-10 px-5 rounded-xl bg-text-primary text-white text-sm font-semibold shadow-md hover:bg-text-primary/90 transition-all flex items-center gap-2">
+                <Save className="w-4 h-4" /> Save Changes
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
