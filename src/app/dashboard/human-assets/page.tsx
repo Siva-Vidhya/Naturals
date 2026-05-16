@@ -1,13 +1,28 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Award, TrendingUp, Search, Plus, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import Modal, { FieldLabel, FieldInput, FieldSelect, PrimaryButton, SecondaryButton } from "@/components/Modal";
+import { supabase } from "@/lib/supabase";
+import AddStaffModal from "@/components/modals/add-staff-modal";
 
 const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 const stagger = { animate: { transition: { staggerChildren: 0.07 } } };
 
-const STAFF = [
+interface StaffMember {
+  name: string;
+  role: string;
+  branch: string;
+  status: string;
+  sessions: number;
+  rating: number;
+  score: number;
+}
+
+const INITIAL_STAFF: StaffMember[] = [
   { name: "Maya Chen",     role: "Senior Stylist",  branch: "Soho",     status: "Active",  sessions: 12, rating: 4.97, score: 98 },
   { name: "James Okafor",  role: "AI Specialist",   branch: "Brooklyn", status: "Active",  sessions: 9,  rating: 4.94, score: 95 },
   { name: "Leila Moss",    role: "Color Expert",    branch: "Midtown",  status: "Active",  sessions: 11, rating: 4.90, score: 91 },
@@ -23,6 +38,34 @@ const statusClass: Record<string, string> = {
 };
 
 export default function HumanAssetsPage() {
+  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+  const [showAddStaff, setShowAddStaff] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const handleAddSuccess = (newStaff: any) => {
+    setStaff(prev => [
+      {
+        name: newStaff.full_name || "New Member",
+        role: newStaff.role || "Stylist",
+        branch: newStaff.branch || "Soho",
+        status: newStaff.status || "Active",
+        sessions: 0,
+        rating: 0,
+        score: 0
+      },
+      ...prev
+    ]);
+  };
+
+  const filteredStaff = searchQuery
+    ? staff.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.role.toLowerCase().includes(searchQuery.toLowerCase()))
+    : staff;
+
+
+
+  const activeCount = staff.filter((s) => s.status === "Active").length;
+  const avgScore = staff.length > 0 ? (staff.reduce((a, s) => a + s.score, 0) / staff.length).toFixed(1) : "0";
+
   return (
     <motion.div variants={stagger} initial="initial" animate="animate" className="space-y-6">
       {/* Header */}
@@ -32,7 +75,7 @@ export default function HumanAssetsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-text-primary">Human Assets</h1>
           <p className="text-sm text-text-secondary mt-1">Staff directory, performance, and training tracker.</p>
         </div>
-        <button className="h-10 px-4 rounded-xl bg-text-primary text-white text-sm font-semibold shadow-md shadow-black/10 hover:bg-text-primary/90 transition-all flex items-center gap-2">
+        <button onClick={() => setShowAddStaff(true)} className="h-10 px-4 rounded-xl bg-text-primary text-white text-sm font-semibold shadow-md shadow-black/10 hover:bg-text-primary/90 transition-all flex items-center gap-2">
           <Plus className="w-4 h-4" /> Add Staff
         </button>
       </motion.div>
@@ -40,10 +83,10 @@ export default function HumanAssetsPage() {
       {/* KPI row */}
       <motion.div variants={stagger} className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Staff",    value: "24",   icon: Users },
-          { label: "Active Today",   value: "18",   icon: TrendingUp },
-          { label: "Avg Performance",value: "91.2%",icon: Award },
-        ].map((k, i) => (
+          { label: "Total Staff",    value: staff.length.toString(), icon: Users },
+          { label: "Active Today",   value: activeCount.toString(),  icon: TrendingUp },
+          { label: "Avg Performance",value: `${avgScore}%`,          icon: Award },
+        ].map((k) => (
           <motion.div key={k.label} variants={fadeUp} className="card p-5 flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-lavender/15 flex items-center justify-center shrink-0">
               <k.icon className="w-4.5 h-4.5 text-[#6b4fa0]" />
@@ -62,12 +105,17 @@ export default function HumanAssetsPage() {
           <h2 className="text-base font-bold text-text-primary">Staff Directory</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
-            <input placeholder="Search staff…" className="h-9 pl-9 pr-4 rounded-xl bg-black/[0.04] border border-transparent text-[13px] focus:bg-white focus:border-lavender/30 outline-none transition-all font-medium" />
+            <input
+              placeholder="Search staff…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 pl-9 pr-4 rounded-xl bg-black/[0.04] border border-transparent text-[13px] focus:bg-white focus:border-lavender/30 outline-none transition-all font-medium"
+            />
           </div>
         </div>
         <div className="divide-y divide-black/[0.04]">
-          {STAFF.map((s, i) => (
-            <motion.div key={s.name} variants={fadeUp}
+          {filteredStaff.map((s, i) => (
+            <motion.div key={`${s.name}-${i}`} variants={fadeUp}
               className="flex items-center gap-4 px-6 py-4 hover:bg-black/[0.02] transition-all cursor-pointer group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender/25 to-blush/25 flex items-center justify-center text-text-primary font-bold text-sm shrink-0">
                 {s.name.charAt(0)}
@@ -76,12 +124,12 @@ export default function HumanAssetsPage() {
                 <p className="text-[13px] font-semibold text-text-primary">{s.name}</p>
                 <p className="text-[11px] text-text-muted">{s.role} · {s.branch}</p>
               </div>
-              <span className={cn("text-[10px] font-semibold px-2.5 py-1 rounded-full hidden sm:inline", statusClass[s.status])}>
+              <span className={cn("text-[10px] font-semibold px-2.5 py-1 rounded-full hidden sm:inline", statusClass[s.status] || statusClass["Active"])}>
                 {s.status}
               </span>
               <div className="text-right hidden md:block">
                 <p className="text-[12px] font-bold text-text-primary">{s.sessions} sessions</p>
-                <p className="text-[11px] text-text-muted">★ {s.rating}</p>
+                <p className="text-[11px] text-text-muted">★ {s.rating || "—"}</p>
               </div>
               <div className="w-20 hidden lg:block">
                 <div className="flex items-center justify-between mb-1">
@@ -130,6 +178,12 @@ export default function HumanAssetsPage() {
           ))}
         </div>
       </motion.div>
+
+      <AddStaffModal 
+        open={showAddStaff} 
+        onClose={() => setShowAddStaff(false)} 
+        onSuccess={handleAddSuccess} 
+      />
     </motion.div>
   );
 }

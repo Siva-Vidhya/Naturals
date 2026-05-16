@@ -2,22 +2,8 @@
 
 import { Bell, Building2, ChevronDown, Command, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { usePathname } from "next/navigation";
-
-const BREADCRUMBS: Record<string, string> = {
-  "/dashboard": "Command Center",
-  "/dashboard/beauty-passport": "Beauty Passport",
-  "/dashboard/stylist-copilot": "Stylist CoPilot",
-  "/dashboard/neural-analytics": "Neural Analytics",
-  "/dashboard/human-assets": "Human Assets",
-  "/dashboard/neural-schedule": "Neural Schedule",
-  "/dashboard/core-settings": "Core Settings",
-};
-
 export default function DashboardHeader() {
   const { user } = useAuth();
-  const pathname = usePathname();
-  const pageName = BREADCRUMBS[pathname] ?? "Dashboard";
   const initial = (user?.user_metadata?.full_name ?? user?.email ?? "U").charAt(0).toUpperCase();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
 

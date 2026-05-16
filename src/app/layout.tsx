@@ -1,10 +1,10 @@
-"use client";
-
-import React, { useEffect } from "react";
+import React from "react";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "sonner";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import type { Metadata, Viewport } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,40 +21,34 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "NeuroStrom | AI-Powered Salon Intelligence",
+  description: "The futuristic OS for luxury salons.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "NeuroStrom",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#A78BFA",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js').then(
-          function (registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-          },
-          function (err) {
-            console.log('ServiceWorker registration failed: ', err);
-          }
-        );
-      });
-    }
-  }, []);
-
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
     >
-      <head>
-        <title>NeuroStrom | AI-Powered Salon Intelligence</title>
-        <meta name="description" content="The futuristic OS for luxury salons." />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#A78BFA" />
-        <link rel="apple-touch-icon" href="/icon.png" />
-      </head>
       <body className="min-h-full flex flex-col bg-cream">
+        <ServiceWorkerRegister />
         <AuthProvider>
           {children}
           <Toaster position="top-center" richColors />

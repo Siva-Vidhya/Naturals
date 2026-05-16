@@ -1,28 +1,71 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, Clock, User } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import Modal, { FieldLabel, FieldInput, FieldSelect, FieldTextarea, PrimaryButton, SecondaryButton } from "@/components/Modal";
+import { supabase } from "@/lib/supabase";
+import NewBookingModal from "@/components/modals/new-booking-modal";
 
 const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 const stagger = { animate: { transition: { staggerChildren: 0.07 } } };
 
 const HOURS = ["9am","10am","11am","12pm","1pm","2pm","3pm","4pm","5pm"];
-const APPOINTMENTS: Record<string, { name: string; service: string; duration: number; color: string }[]> = {
-  "10am": [{ name: "Seraphina J.", service: "Molecular Infusion",  duration: 2, color: "bg-lavender/30 border-lavender/50 text-[#5a3d8a]" }],
-  "12pm": [{ name: "Elena V.",     service: "Neural Color Scan",   duration: 1, color: "bg-blush/30 border-blush/50 text-[#8a3d5a]" }],
-  "2pm":  [{ name: "Dominic R.",   service: "Scalp Detox",          duration: 1, color: "bg-sage/30 border-sage/50 text-[#3d6a5a]" }],
-  "3pm":  [{ name: "Marcus W.",    service: "Keratin Treatment",    duration: 2, color: "bg-peach/30 border-peach/50 text-[#8a5c3d]" }],
-};
 const DAYS = ["Mon 12","Tue 13","Wed 14","Thu 15","Fri 16","Sat 17","Sun 18"];
+
+interface Appointment {
+  name: string;
+  service: string;
+  duration: number;
+  color: string;
+}
+
 const AI_SUGGESTIONS = [
   { text: "Move Elena V. 15 min earlier to reduce gap between appointments", type: "Optimise" },
   { text: "Dominic R. has 2 no-shows — send automated reminder at 1pm",      type: "Alert" },
   { text: "Saturday is at 94% capacity — open overflow bookings",             type: "Capacity" },
 ];
 
+const COLORS = [
+  "bg-lavender/30 border-lavender/50 text-[#5a3d8a]",
+  "bg-blush/30 border-blush/50 text-[#8a3d5a]",
+  "bg-sage/30 border-sage/50 text-[#3d6a5a]",
+  "bg-peach/30 border-peach/50 text-[#8a5c3d]",
+];
+
 export default function NeuralSchedulePage() {
   const today = 2; // index of today (Wed 14)
+
+  const [appointments, setAppointments] = useState<Record<string, Appointment[]>>({
+    "10am": [{ name: "Seraphina J.", service: "Molecular Infusion",  duration: 2, color: COLORS[0] }],
+    "12pm": [{ name: "Elena V.",     service: "Neural Color Scan",   duration: 1, color: COLORS[1] }],
+    "2pm":  [{ name: "Dominic R.",   service: "Scalp Detox",          duration: 1, color: COLORS[2] }],
+    "3pm":  [{ name: "Marcus W.",    service: "Keratin Treatment",    duration: 2, color: COLORS[3] }],
+  });
+
+  const [showNewBooking, setShowNewBooking] = useState(false);
+
+  const handleBookingSuccess = (newBooking: any) => {
+    // Update local state for immediate feedback
+    const timeSlot = newBooking.booking_time || "10am";
+    const newAppt: Appointment = {
+      name: newBooking.customer_name || "New Client",
+      service: newBooking.service || "Treatment",
+      duration: parseInt(newBooking.duration_hours || "1"),
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    };
+
+    setAppointments(prev => ({
+      ...prev,
+      [timeSlot]: [...(prev[timeSlot] || []), newAppt]
+    }));
+    toast.success("Schedule updated!");
+  };
+
+
+
   return (
     <motion.div variants={stagger} initial="initial" animate="animate" className="space-y-6">
       {/* Header */}
@@ -32,7 +75,7 @@ export default function NeuralSchedulePage() {
           <h1 className="text-3xl font-bold tracking-tight text-text-primary">Neural Schedule</h1>
           <p className="text-sm text-text-secondary mt-1">AI-optimised appointment calendar.</p>
         </div>
-        <button className="h-10 px-4 rounded-xl bg-text-primary text-white text-sm font-semibold shadow-md hover:bg-text-primary/90 transition-all flex items-center gap-2">
+        <button onClick={() => setShowNewBooking(true)} className="h-10 px-4 rounded-xl bg-text-primary text-white text-sm font-semibold shadow-md hover:bg-text-primary/90 transition-all flex items-center gap-2">
           <Plus className="w-4 h-4" /> New Booking
         </button>
       </motion.div>
@@ -77,7 +120,7 @@ export default function NeuralSchedulePage() {
                 <span className="text-[10px] font-medium text-text-muted">{h}</span>
               </div>
               {DAYS.map((_, di) => {
-                const appt = di === today ? APPOINTMENTS[h] : undefined;
+                const appt = di === today ? appointments[h] : undefined;
                 return (
                   <div key={di} className={cn("py-1.5 px-1.5 border-l border-black/[0.04] min-h-[48px]", di === today && "bg-lavender/[0.03]")}>
                     {appt?.map((a, ai) => (
@@ -118,6 +161,12 @@ export default function NeuralSchedulePage() {
           ))}
         </div>
       </motion.div>
+
+      <NewBookingModal 
+        open={showNewBooking} 
+        onClose={() => setShowNewBooking(false)} 
+        onSuccess={handleBookingSuccess} 
+      />
     </motion.div>
   );
 }

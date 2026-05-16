@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Users, Calendar, Settings, LogOut,
-  Sparkles, Camera, Bot, BarChart3, ChevronRight
+  Sparkles, Camera, Bot, BarChart3
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
