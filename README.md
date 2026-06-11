@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NeuroStrom AI Salon Operating System
 
-## Getting Started
+## Overview
+NeuroStrom is an AI-powered salon operating system designed to streamline salon management and enhance customer experiences. It integrates appointment scheduling, customer management, AI-driven recommendations, and business analytics into one platform.
 
-First, run the development server:
+## Problem Statement
+Traditional salon operations rely on multiple disconnected tools, resulting in inefficient workflows, poor customer engagement, and limited business insights.
+
+## Solution
+NeuroStrom provides a centralized platform that enables salon owners to:
+- Manage appointments efficiently
+- Maintain customer records
+- Receive AI-powered recommendations
+- Track business performance through analytics
+- Improve customer satisfaction
+
+## Features
+- Appointment Booking and Scheduling
+- Customer Profile Management
+- AI-Based Recommendations
+- Dashboard and Analytics
+- Secure Authentication
+- Responsive User Interface
+
+## Tech Stack
+- Frontend: Next.js
+- Backend: Node.js
+- Database: SQL
+- Styling: CSS/Tailwind CSS
+- Version Control: Git & GitHub
+
+## Project Structure
+```
+src/       → Application source code
+public/    → Static assets
+migration.sql → Database migration scripts
+```
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Siva-Vidhya/Naturals.git
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the application:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Future Enhancements
+- Voice-based assistant
+- Personalized beauty recommendations
+- Inventory management
+- Mobile application support
 
-## Learn More
+## Author
+Sivavidhya P
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+GitHub: https://github.com/Siva-Vidhya
